@@ -1,0 +1,6 @@
+.env
+.venv
+venv
+proxies.txt
+__pycache__
+chromedriver.exe

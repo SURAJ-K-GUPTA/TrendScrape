@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Trends</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Twitter Trends</h1>
+    <button onclick="window.location.href='/run-script'">Run Script</button>
+
+    {% if record %}
+        <h2>These are the most happening topics as on {{ record.date_time }}:</h2>
+        <ul>
+            {% for trend in record.trends %}
+                <li>{{ trend }}</li>
+            {% endfor %}
+        </ul>
+        <p>The IP address used for this query was <strong>{{ record.proxy_ip }}</strong>.</p>
+        <h3>Raw JSON:</h3>
+        <pre>{{ record | tojson }}</pre>
+    {% elif error %}
+        <p style="color: red;">{{ error }}</p>
+    {% else %}
+        <p>No trends available. Click "Run Script" to fetch the latest trends.</p>
+    {% endif %}
+</body>
+</html>
