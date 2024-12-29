@@ -182,6 +182,10 @@ def fetch_twitter_trends():
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         return {"trends": [], "proxy_used": "Unknown"}
+    
+    finally:
+        driver.quit()
+        
 if __name__ == "__main__":
     result = fetch_twitter_trends()
     if result:
