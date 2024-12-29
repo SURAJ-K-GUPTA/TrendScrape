@@ -96,133 +96,92 @@ def fetch_twitter_trends():
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.NAME, "text"))
         )
-        print("textbox located")
+        print("Textbox located")
+
         # Log in to Twitter
         username_field = driver.find_element(By.NAME, "text")
         username_field.send_keys("setubazaar@gmail.com")
         time.sleep(2)
-        element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'css-1jxf684') and text()='Next']"))
+
+        next_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'css-1jxf684') and text()='Next']"))
         )
-        # Click the element
-        element.click()
+        next_button.click()
 
-        print("Waiting for unusual activity form...")
-        unusual_activity_element = WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.NAME, "text"))
-        )
-        if unusual_activity_element:
-            print("unusual_activity_element located")
-            # Log in to Twitter
-            username_field = driver.find_element(By.NAME, "text")
-            username_field.send_keys("SETUBAZAAR")
-
-
-            unusual_activity_element_input = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//span[text()='Next']"))
+        # Handle unusual activity check if present
+        try:
+            unusual_activity_element = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.NAME, "text"))
             )
-            # Click the element
-            print("unusual_activity_element_input located")
-            print(unusual_activity_element_input)
-            unusual_activity_element_input.click()
+            if unusual_activity_element:
+                print("Unusual activity form located")
+                unusual_activity_element.send_keys("SETUBAZAAR")
+                next_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, "//span[text()='Next']"))
+                )
+                next_button.click()
+        except Exception as e:
+            print("Unusual activity form not found, proceeding.")
 
-
-
-        
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.NAME, "password"))
         )
-        print("password field located")
+        print("Password field located")
 
         password_field = driver.find_element(By.NAME, "password")
-
         password_field.send_keys(PASSWORD)
         time.sleep(2)
-        element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'css-1jxf684') and text()='Log in']"))
+
+        login_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'css-1jxf684') and text()='Log in']"))
         )
-        # Click the element
-        element.click()
-        # password_field.submit()
+        login_button.click()
 
         time.sleep(5)  # Allow time for redirection
+        current_url = driver.current_url
+        print(f"Current URL: {current_url}")
 
-        print("Navigating to home...")
-        driver.get("https://x.com/home")
+        # Check if the user is already on the home page
+        if "x.com/home" not in current_url:
+            print("Navigating to home...")
+            driver.get("https://x.com/home")
+        else:
+            print("Already on the home page.")
+
 
         # Wait for trends section
         print("Waiting for trends section...")
-        time.sleep(5)
-        trends_section = WebDriverWait(driver, 15).until(
+        trends_section = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div.css-175oi2r.r-kemksi.r-1kqtdi0.r-1867qdf.r-1phboty.r-rs99b7.r-1ifxtd0.r-1udh08x"))
         )
+
         if not trends_section:
             print("Trends section not found. Exiting.")
-            return
-        print("trends section located")
+            return {"trends": [], "proxy_used": "Unknown"}
+
+        print("Trends section located")
         elements = driver.find_elements(By.CSS_SELECTOR, 'div.css-175oi2r.r-kemksi.r-1kqtdi0.r-1867qdf.r-1phboty.r-rs99b7.r-1ifxtd0.r-1udh08x')
-        print("trends located")
-        # Create an array to store the text
-
-        # Loop through the elements and store the text in the array
-        
-
-        # Print the array of texts
-        # print("Top 5 trends:")
-        # top_5_trends = []
-        # for element in elements:
-        #     inner_text = element.get_attribute("innerText")  # Get inner text of the element
-        #     top_5_trends.append(inner_text)
-        
-        # # filter trends array such that only items that start with # are included
-        # # Print the filtered_trends
-        # print(f"Filtered trends: {top_5_trends}")  
-        # Fetch top 5 trends
-        # trends = driver.find_elements(By.CSS_SELECTOR, "[data-testid='trend']")
-        html_content = ""
-        for element in elements:
-            html_content += element.get_attribute('outerHTML')
-
+        time.sleep(5)
         # Parse the HTML
+        html_content = "".join([element.get_attribute('outerHTML') for element in elements])
         soup = BeautifulSoup(html_content, 'html.parser')
-
-        # Find all the trends by looking for divs with data-testid="trend"
         trends = soup.find_all('div', {'data-testid': 'trend'})
 
-        # Extract the trend names (inside span tags with specific class)
+        # Extract the trend names
         trending_topics = []
         for trend in trends:
             trend_name = trend.find('div', {'class': 'r-a023e6'})
             if trend_name:
-                span = trend_name.find('span')  # Locate the span tag
+                span = trend_name.find('span')
                 if span:
-                    trending_topics.append(span.text)  # Extract and append its text
-
-            # look for span inside this div
-            
-            # if trend_name:
-                # trending_topics.append(trend_name.text)
-
-        # Print the trending topics
-        print(trending_topics)
+                    trending_topics.append(span.text)
 
         print("Top 5 trends fetched successfully:", trending_topics)
-
-        # Add a sleep to simulate user interaction
-        time.sleep(2)
-
-        # driver.quit()
-
-        return {
-            "trends": trending_topics,
-            "proxy_used": proxy
-        }
+        return {"trends": trending_topics, "proxy_used": proxy}
 
     except Exception as e:
-        print(f"Error: {e}")
-        # driver.quit()
-        return None
-
+        print(f"An error occurred: {str(e)}")
+        return {"trends": [], "proxy_used": "Unknown"}
 if __name__ == "__main__":
     result = fetch_twitter_trends()
     if result:

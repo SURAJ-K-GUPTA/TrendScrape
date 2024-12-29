@@ -24,26 +24,43 @@
         ul {
             padding-left: 20px;
         }
+        .error {
+            color: red;
+        }
+        .timestamp {
+            font-style: italic;
+            margin-top: 10px;
+        }
+        .proxy {
+            margin-top: 10px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
     <h1>Twitter Trends</h1>
-    <button onclick="window.location.href='/run-script'">Run Script</button>
+    <button onclick="window.location.href='/run-script'">Fetch Latest Trends</button>
 
     {% if record %}
-        <h2>These are the most happening topics as on {{ record.date_time }}:</h2>
+        <h2>Trending Topics</h2>
+        <p class="timestamp">As of: {{ record.timestamp }}</p>
         <ul>
             {% for trend in record.trends %}
                 <li>{{ trend }}</li>
             {% endfor %}
         </ul>
-        <p>The IP address used for this query was <strong>{{ record.proxy_ip }}</strong>.</p>
-        <h3>Raw JSON:</h3>
+        <p class="proxy">Proxy Used: <strong>{{ record.proxy_used }}</strong></p>
+        <h3>Raw JSON Data:</h3>
         <pre>{{ record | tojson }}</pre>
     {% elif error %}
-        <p style="color: red;">{{ error }}</p>
+        <p class="error">{{ error }}</p>
     {% else %}
-        <p>No trends available. Click "Run Script" to fetch the latest trends.</p>
+        <p>No trends available. Click the button above to fetch the latest trends.</p>
     {% endif %}
 </body>
 </html>
